@@ -4,10 +4,11 @@ namespace App\Notifications;
 
 use App\Models\LaporanKerusakan;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class DamageReportStatusUpdated extends Notification
+class DamageReportStatusUpdated extends Notification implements ShouldQueue
 {
     use Queueable;
 

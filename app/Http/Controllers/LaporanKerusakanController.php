@@ -102,8 +102,13 @@ class LaporanKerusakanController extends Controller implements HasMiddleware
         if (auth()->user()->hasRole('crew')) {
             $recipients = User::role(['mechanic', 'staff', 'super-admin'])->get();
             if ($recipients->isNotEmpty()) {
-                $report->load('vehicle');
-                Notification::send($recipients, new DamageReportCreated($report));
+                try {
+                    $report->load('vehicle');
+                    Notification::send($recipients, new DamageReportCreated($report));
+                } catch (\Throwable $e) {
+                    // Prevent notification failures (e.g., mail transport) from breaking request
+                    report($e);
+                }
             }
         }
         return redirect()->route('laporan-kerusakan.index')->with('success', 'Laporan kerusakan berhasil ditambahkan');
@@ -142,7 +147,11 @@ class LaporanKerusakanController extends Controller implements HasMiddleware
         if (isset($data['status']) && $data['status'] !== $oldStatus) {
             $laporan_kerusakan->loadMissing('reporter');
             if ($laporan_kerusakan->reporter) {
-                $laporan_kerusakan->reporter->notify(new DamageReportStatusUpdated($laporan_kerusakan, $oldStatus, $data['status']));
+                try {
+                    $laporan_kerusakan->reporter->notify(new DamageReportStatusUpdated($laporan_kerusakan, $oldStatus, $data['status']));
+                } catch (\Throwable $e) {
+                    report($e);
+                }
             }
         }
         return redirect()->route('laporan-kerusakan.index')->with('success', 'Laporan kerusakan berhasil diperbarui');
