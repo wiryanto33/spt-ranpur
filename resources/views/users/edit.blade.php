@@ -68,7 +68,13 @@
                                         <label>Foto Profil</label>
                                         <input type="file" class="form-control-file @error('image') is-invalid @enderror" name="image" accept="image/*">
                                         @if($user->image)
-                                            <div class="mt-2"><img src="{{ asset('storage/'.$user->image) }}" alt="preview" style="max-height:80px"></div>
+                                            @php
+                                                $img = $user->image;
+                                                $src = $img ? (preg_match('/^uploads\//', $img) ? asset($img) : asset('storage/'.$img)) : null;
+                                            @endphp
+                                            @if($src)
+                                                <div class="mt-2"><img src="{{ $src }}" alt="preview" style="max-height:80px"></div>
+                                            @endif
                                         @endif
                                         @error('image')
                                             <div class="text-danger small">{{ $message }}</div>

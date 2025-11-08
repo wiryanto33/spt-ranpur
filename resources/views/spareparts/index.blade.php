@@ -53,7 +53,8 @@
                                         <td>{{ $sp->location?->kode ? ($sp->location->kode . ' — ' . $sp->location->nama) : '-' }}</td>
                                         <td>
                                             @if($sp->image)
-                                                <img src="{{ asset('storage/' . $sp->image) }}" alt="img" style="max-height:50px">
+                                                @php $src = preg_match('/^uploads\//', $sp->image) ? asset($sp->image) : asset('storage/'.$sp->image); @endphp
+                                                <img src="{{ $src }}" alt="img" style="max-height:50px">
                                             @else
                                                 -
                                             @endif

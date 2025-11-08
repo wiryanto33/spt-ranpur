@@ -149,7 +149,11 @@
                                         <label>Foto Profil</label>
                                         <input type="file" name="image" class="form-control-file @error('image', 'updateProfileInformation') is-invalid @enderror" accept="image/*">
                                         @if(Auth::user()->image)
-                                            <div class="mt-2"><img src="{{ asset('storage/'.Auth::user()->image) }}" style="max-height:80px" class="rounded"></div>
+                                            @php
+                                                $img = Auth::user()->image;
+                                                $src = preg_match('/^uploads\//', $img) ? asset($img) : asset('storage/'.$img);
+                                            @endphp
+                                            <div class="mt-2"><img src="{{ $src }}" style="max-height:80px" class="rounded"></div>
                                         @endif
                                         @error('image', 'updateProfileInformation')
                                             <div class="text-danger small">{{ $message }}</div>

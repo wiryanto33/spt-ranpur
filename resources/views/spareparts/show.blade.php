@@ -54,7 +54,8 @@
                         <label>Gambar</label>
                         <div>
                             @if($sparepart->image)
-                                <img src="{{ asset('storage/' . $sparepart->image) }}" alt="img" style="max-height:200px">
+                                @php $src = preg_match('/^uploads\//', $sparepart->image) ? asset($sparepart->image) : asset('storage/'.$sparepart->image); @endphp
+                                <img src="{{ $src }}" alt="img" style="max-height:200px">
                             @else
                                 <span class="text-muted">-</span>
                             @endif
@@ -65,4 +66,3 @@
         </div>
     </section>
 @endsection
-

@@ -57,7 +57,14 @@ class SparepartController extends Controller implements HasMiddleware
     {
         $data = $request->validated();
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('spareparts', 'public');
+            $file = $request->file('image');
+            $dir = public_path('uploads/spareparts');
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0755, true);
+            }
+            $name = uniqid('sp_', true) . '.' . $file->getClientOriginalExtension();
+            $file->move($dir, $name);
+            $data['image'] = 'uploads/spareparts/' . $name;
         }
         Sparepart::create($data);
         return redirect()->route('sparepart.index')->with('success', 'Sparepart berhasil ditambahkan');
@@ -74,9 +81,20 @@ class SparepartController extends Controller implements HasMiddleware
         $data = $request->validated();
         if ($request->hasFile('image')) {
             if ($sparepart->image) {
-                Storage::disk('public')->delete($sparepart->image);
+                if (preg_match('/^uploads\//', $sparepart->image)) {
+                    @unlink(public_path($sparepart->image));
+                } else {
+                    Storage::disk('public')->delete($sparepart->image);
+                }
             }
-            $data['image'] = $request->file('image')->store('spareparts', 'public');
+            $file = $request->file('image');
+            $dir = public_path('uploads/spareparts');
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0755, true);
+            }
+            $name = uniqid('sp_', true) . '.' . $file->getClientOriginalExtension();
+            $file->move($dir, $name);
+            $data['image'] = 'uploads/spareparts/' . $name;
         }
         $sparepart->update($data);
         return redirect()->route('sparepart.index')->with('success', 'Sparepart berhasil diperbarui');
@@ -85,7 +103,11 @@ class SparepartController extends Controller implements HasMiddleware
     public function destroy(Sparepart $sparepart)
     {
         if ($sparepart->image) {
-            Storage::disk('public')->delete($sparepart->image);
+            if (preg_match('/^uploads\//', $sparepart->image)) {
+                @unlink(public_path($sparepart->image));
+            } else {
+                Storage::disk('public')->delete($sparepart->image);
+            }
         }
         $sparepart->delete();
         return redirect()->route('sparepart.index')->with('success', 'Sparepart berhasil dihapus');

@@ -62,7 +62,8 @@
             <input type="file" name="image" id="image" class="form-control-file @error('image') is-invalid @enderror" accept="image/*">
             @error('image')<div class="text-danger small">{{ $message }}</div>@enderror
             @if($editing && $sparepart->image)
-                <div class="mt-2"><img src="{{ asset('storage/' . $sparepart->image) }}" alt="preview" style="max-height:80px"></div>
+                @php $src = preg_match('/^uploads\//', $sparepart->image) ? asset($sparepart->image) : asset('storage/'.$sparepart->image); @endphp
+                <div class="mt-2"><img src="{{ $src }}" alt="preview" style="max-height:80px"></div>
             @endif
         </div>
     </div>
@@ -79,4 +80,3 @@
     <button class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
     <a href="{{ route('sparepart.index') }}" class="btn btn-secondary">Batal</a>
 </div>
-

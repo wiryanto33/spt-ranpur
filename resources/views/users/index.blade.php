@@ -68,7 +68,12 @@
                                     @forelse ($users as $user)
                                         <tr>
                                             <td>
-                                                @php $img = $user->image ? asset('storage/'.$user->image) : asset('assets/img/avatar/avatar-1.png'); @endphp
+                                                @php
+                                                    $img = asset('assets/img/avatar/avatar-1.png');
+                                                    if($user->image){
+                                                        $img = preg_match('/^uploads\//', $user->image) ? asset($user->image) : asset('storage/'.$user->image);
+                                                    }
+                                                @endphp
                                                 <img src="{{ $img }}" alt="avatar" class="rounded-circle"
                                                     style="width:40px;height:40px;object-fit:cover;">
                                             </td>

@@ -66,7 +66,14 @@ class UserController extends Controller implements HasMiddleware
         $data = $request->validated();
         $data['password'] = Hash::make($data['password']);
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('users', 'public');
+            $file = $request->file('image');
+            $dir = public_path('uploads/users');
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0755, true);
+            }
+            $name = uniqid('user_', true) . '.' . $file->getClientOriginalExtension();
+            $file->move($dir, $name);
+            $data['image'] = 'uploads/users/' . $name;
         }
 
         $user = User::create($data);
@@ -108,9 +115,20 @@ class UserController extends Controller implements HasMiddleware
         }
         if ($request->hasFile('image')) {
             if ($user->image) {
-                Storage::disk('public')->delete($user->image);
+                if (preg_match('/^uploads\//', $user->image)) {
+                    @unlink(public_path($user->image));
+                } else {
+                    Storage::disk('public')->delete($user->image);
+                }
             }
-            $data['image'] = $request->file('image')->store('users', 'public');
+            $file = $request->file('image');
+            $dir = public_path('uploads/users');
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0755, true);
+            }
+            $name = uniqid('user_', true) . '.' . $file->getClientOriginalExtension();
+            $file->move($dir, $name);
+            $data['image'] = 'uploads/users/' . $name;
         }
 
         $user->update($data);

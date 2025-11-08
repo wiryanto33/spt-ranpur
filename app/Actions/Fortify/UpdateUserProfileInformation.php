@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
@@ -33,13 +34,24 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             'image' => ['nullable', 'image', 'max:2048'],
         ])->validateWithBag('updateProfileInformation');
 
-        // Handle profile image upload if present
+        // Handle profile image upload if present (store in public/uploads/users)
         if (request()->hasFile('image')) {
+            // delete previous image (support old storage path and new uploads path)
             if ($user->image) {
-                Storage::disk('public')->delete($user->image);
+                if (preg_match('/^uploads\//', $user->image)) {
+                    @unlink(public_path($user->image));
+                } else {
+                    Storage::disk('public')->delete($user->image);
+                }
             }
-            $path = request()->file('image')->store('users', 'public');
-            $user->image = $path;
+            $file = request()->file('image');
+            $dir = public_path('uploads/users');
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0755, true);
+            }
+            $name = uniqid('user_', true) . '.' . $file->getClientOriginalExtension();
+            $file->move($dir, $name);
+            $user->image = 'uploads/users/' . $name;
         }
 
         // If email verification is enforced and email changes

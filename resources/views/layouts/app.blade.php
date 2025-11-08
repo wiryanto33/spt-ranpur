@@ -143,10 +143,11 @@
                     <li class="dropdown"><a href="#" data-toggle="dropdown"
                             class="nav-link dropdown-toggle nav-link-lg nav-link-user">
                             @php
-                                $avatar =
-                                    auth()->check() && auth()->user()->image
-                                        ? asset('storage/' . auth()->user()->image)
-                                        : asset('assets/img/avatar/avatar-1.png');
+                                $avatar = asset('assets/img/avatar/avatar-1.png');
+                                if (auth()->check() && auth()->user()->image) {
+                                    $img = auth()->user()->image;
+                                    $avatar = preg_match('/^uploads\//', $img) ? asset($img) : asset('storage/'.$img);
+                                }
                             @endphp
                             <img alt="avatar" src="{{ $avatar }}" class="rounded-circle mr-1"
                                 style="width:32px;height:32px;object-fit:cover;">
