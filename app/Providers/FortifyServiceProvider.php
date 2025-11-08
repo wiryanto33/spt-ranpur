@@ -74,16 +74,24 @@ class FortifyServiceProvider extends ServiceProvider
 
         //custom login validation
         Fortify::authenticateUsing(function (Request $request) {
-            //validate the request
-            $request->validate([
+            // Build validation rules dynamically to allow disabling reCAPTCHA when not configured
+            $rules = [
                 'email' => 'required|email',
                 'password' => 'required',
-                'recaptcha_token' => [
+            ];
+
+            // Only require reCAPTCHA when a secret key is configured
+            if (config('services.recaptcha.secret_key')) {
+                $rules['recaptcha_token'] = [
                     'required',
-                    new Recaptcha()
-                ]
-            ]);
-            //attempt to login the user
+                    new Recaptcha(),
+                ];
+            }
+
+            // Validate the request
+            $request->validate($rules);
+
+            // Attempt to login the user
             if (Auth::attempt($request->only('email', 'password'))) {
                 return Auth::user();
             }

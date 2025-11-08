@@ -2,39 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\UsersExport;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\UsersImport;
-use App\Models\Category;
+use App\Models\Ranpur;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Support\Facades\DB;
-
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller implements HasMiddleware
 {
-
-    // public function __construct()
-    // {
-    //     $this->middleware('auth');
-    //     $this->middleware('permission:user.index')->only('index');
-    //     $this->middleware('permission:user.create')->only('create', 'store');
-    //     $this->middleware('permission:user.edit')->only('edit', 'update');
-    //     $this->middleware('permission:user.destroy')->only('destroy');
-    // }
-
-    /**
-     * Get the middleware that should be assigned to the controller.
-     */
     public static function middleware(): array
     {
         return [
             'auth',
+            new Middleware('verified'),
             new Middleware('permission:user.index', only: ['index']),
             new Middleware('permission:user.create', only: ['create', 'store']),
             new Middleware('permission:user.edit', only: ['edit', 'update']),
@@ -44,124 +29,108 @@ class UserController extends Controller implements HasMiddleware
 
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
-        //index -> menampilkan tabel data
+        $query = User::with(['roles', 'vehicle'])->orderBy('name');
 
-        Category::create([
-            "name" => "Masuk User Page",
-        ]);
+        if ($q = $request->input('q')) {
+            $query->where(function ($qBuilder) use ($q) {
+                $qBuilder->where('name', 'like', "%{$q}%")
+                    ->orWhere('email', 'like', "%{$q}%")
+                    ->orWhere('nrp', 'like', "%{$q}%")
+                    ->orWhere('pangkat', 'like', "%{$q}%");
+            });
+        }
 
-        // mengambil data
-        $users = DB::table('users')
-            ->when($request->input('name'), function ($query, $name) {
-                return $query->where('name', 'like', '%' . $name . '%');
-            })
-            ->select('id', 'name', 'email', DB::raw("DATE_FORMAT(created_at, '%d %M %Y') as created_at"))
-            ->paginate(10);
+        $users = $query->paginate(10)->withQueryString();
+
         return view('users.index', compact('users'));
     }
 
     /**
      * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        // halaman tambah user
-        return view('users.create');
+        $roles = Role::pluck('name', 'id');
+        $vehicles = Ranpur::orderBy('nomor_lambung')->get(['id', 'nomor_lambung', 'tipe']);
+        return view('users.create', compact('roles', 'vehicles'));
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function store(StoreUserRequest $request)
     {
-        //simpan data
-        User::create([
-            'name' => $request['name'],
-            'email' => $request['email'],
-            'password' => Hash::make($request['password']),
-        ]);
-        return redirect(route('user.index'))->with('success', 'Data Berhasil Ditambahkan');;
+        $data = $request->validated();
+        $data['password'] = Hash::make($data['password']);
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('users', 'public');
+        }
+
+        $user = User::create($data);
+        $user->assignRole($request->role);
+
+        return redirect()->route('user.index')->with('success', 'User berhasil ditambahkan.');
     }
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function show(User $user)
     {
-        //nampilkan detail satu user
+        return view('users.show', compact('user'));
     }
 
     /**
      * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function edit(User $user)
     {
-        return view('users.edit')
-            ->with('user', $user);
+        $roles = Role::pluck('name', 'id');
+        $user->load('roles');
+        $vehicles = Ranpur::orderBy('nomor_lambung')->get(['id', 'nomor_lambung', 'tipe']);
+        return view('users.edit', compact('user', 'roles', 'vehicles'));
     }
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        //mengupdate data user ke database
-        $validate = $request->validated();
+        $data = $request->validated();
 
-        $user->update($validate);
-        return redirect()->route('user.index')->with('success', 'User Berhasil Diupdate');
+        if (!empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']);
+        }
+        if ($request->hasFile('image')) {
+            if ($user->image) {
+                Storage::disk('public')->delete($user->image);
+            }
+            $data['image'] = $request->file('image')->store('users', 'public');
+        }
+
+        $user->update($data);
+        $user->syncRoles($request->role);
+
+        return redirect()->route('user.index')->with('success', 'User berhasil diperbarui.');
     }
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function destroy(User $user)
     {
-        //delete data
-        $user->delete();
-        return redirect()->route('user.index')->with('success', 'User Deleted Successfully');
-    }
-
-    public function export()
-    {
-        // export data ke excel
-        return Excel::download(new UsersExport, 'users.xlsx');
-    }
-
-    public function import(Request $request)
-    {
-        // import excel ke data tables
-        $users = Excel::toCollection(new UsersImport, $request->import_file);
-        foreach ($users[0] as $user) {
-            User::where('id', $user[0])->update([
-                'name' => $user[1],
-                'email' => $user[2],
-                'password' => $user[3],
-            ]);
+        // Prevent deleting self
+        if ($user->id === auth()->id()) {
+            return redirect()->route('user.index')->withErrors('Anda tidak dapat menghapus akun Anda sendiri.');
         }
-        return redirect()->route('user.index');
+
+        $user->delete();
+
+        return redirect()->route('user.index')->with('success', 'User berhasil dihapus.');
     }
 }

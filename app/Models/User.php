@@ -5,13 +5,14 @@ namespace App\Models;
 use App\Notifications\CustomEmailResetMessage;
 use App\Notifications\CustomEmailVerificationMessage;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable //implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
@@ -23,6 +24,12 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
+        'pangkat',
+        'nrp',
+        'jabatan',
+        'status',
+        'image',
+        'ranpur_id',
         'password',
     ];
 
@@ -54,5 +61,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new CustomEmailResetMessage($token));
+    }
+
+    /**
+     * Get the vehicle assigned to the user.
+     */
+    public function vehicle(): BelongsTo
+    {
+        return $this->belongsTo(Ranpur::class, 'ranpur_id');
     }
 }

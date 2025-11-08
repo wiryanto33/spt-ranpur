@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Menu;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMenuItemRequest;
+use App\Http\Requests\UpdateMenuItemRequest;
 use App\Models\MenuGroup;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
@@ -91,7 +92,9 @@ class MenuItemController extends Controller implements HasMiddleware
      */
     public function edit(MenuItem $menuItem)
     {
-        return view('menu.menu-item.edit', compact('menuItem'));
+        $routeCollection = Route::getRoutes();
+        $menuGroups = MenuGroup::all();
+        return view('menu.menu-item.edit', compact('menuItem', 'routeCollection', 'menuGroups'));
     }
 
     /**

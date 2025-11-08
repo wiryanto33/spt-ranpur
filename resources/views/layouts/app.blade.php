@@ -102,20 +102,65 @@
                     </div>
                 </form>
                 <ul class="navbar-nav navbar-right">
-                    <li class="dropdown dropdown-list-toggle"><a href="#" data-toggle="dropdown"
-                            class="nav-link nav-link-lg message-toggle beep"><i class="far fa-envelope"></i></a>
+                    @php
+                        $unreadCount = auth()->user()->unreadNotifications()->count();
+                        $unread = auth()->user()->unreadNotifications()->latest()->limit(10)->get();
+                    @endphp
+                    <li class="dropdown dropdown-list-toggle">
+                        <a href="#" data-toggle="dropdown" class="nav-link nav-link-lg notification-toggle {{ $unreadCount ? 'beep' : '' }}">
+                            <i class="far fa-bell"></i>
+                        </a>
                         <div class="dropdown-menu dropdown-list dropdown-menu-right">
-                            <div class="dropdown-header">Messages
+                            <div class="dropdown-header">Notifikasi
                                 <div class="float-right">
-                                    <a href="#">Mark All As Read</a>
+                                    <a href="{{ route('notifications.readAll') }}">Tandai semua dibaca</a>
                                 </div>
                             </div>
+                            <div class="dropdown-list-content dropdown-list-icons">
+                                @forelse ($unread as $n)
+                                    <a href="{{ route('notifications.read', $n->id) }}" class="dropdown-item dropdown-item-unread">
+                                        <div class="dropdown-item-icon bg-primary text-white">
+                                            <i class="fas fa-info"></i>
+                                        </div>
+                                        <div class="dropdown-item-desc">
+                                            {{ data_get($n->data, 'title', 'Notifikasi') }}
+                                            <div class="time text-primary">{{ $n->created_at->diffForHumans() }}</div>
+                                            @if (data_get($n->data, 'message'))
+                                                <div class="text-muted small">{{ data_get($n->data, 'message') }}</div>
+                                            @endif
+                                        </div>
+                                    </a>
+                                @empty
+                                    <div class="dropdown-item text-center text-muted">Tidak ada notifikasi baru</div>
+                                @endforelse
+                            </div>
+                            <div class="dropdown-footer text-center">
+                                <a href="#" onclick="event.preventDefault(); location.reload();">Tutup</a>
+                            </div>
+                        </div>
                     </li>
 
                     <li class="dropdown"><a href="#" data-toggle="dropdown"
                             class="nav-link dropdown-toggle nav-link-lg nav-link-user">
-                            <img alt="image" src="/assets/img/avatar/avatar-1.png" class="rounded-circle mr-1">
-                            <div class="d-sm-none d-lg-inline-block">Hi, {{ auth()->user()->name }}</div>
+                            @php
+                                $avatar =
+                                    auth()->check() && auth()->user()->image
+                                        ? asset('storage/' . auth()->user()->image)
+                                        : asset('assets/img/avatar/avatar-1.png');
+                            @endphp
+                            <img alt="avatar" src="{{ $avatar }}" class="rounded-circle mr-1"
+                                style="width:32px;height:32px;object-fit:cover;">
+                            @php
+                                $roleName = auth()->user()->getRoleNames()->first();
+                                $roleText = $roleName ? strtoupper(str_replace('-', ' ', $roleName)) : null;
+                                $vehicleType = $roleName === 'crew' ? optional(auth()->user()->vehicle)->tipe : null;
+                            @endphp
+                            <div class="d-sm-none d-lg-inline-block">
+                                Hi, {{ auth()->user()->name }}
+                                @if($roleText)
+                                    <small> {{ $roleText }}@if($vehicleType) · {{ $vehicleType }} @endif</small>
+                                @endif
+                            </div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
                             <a href="{{ route('profile') }}" class="dropdown-item has-icon">
@@ -136,7 +181,7 @@
                 </ul>
             </nav>
             <div class="main-sidebar">
-                <x-sidebar title="Test" />
+                <x-sidebar title="Dashboard Ranpur" />
                 {{-- @include('layouts.sidebar') --}}
             </div>
 
@@ -173,6 +218,40 @@
 
     <!-- Page Specific JS File -->
     @stack('customScript')
+
+    <script>
+        // Persist sidebar state across refresh using localStorage
+        (function() {
+            const KEY = 'sidebar-mini-state';
+            const body = document.body;
+
+            function applySavedState() {
+                const saved = localStorage.getItem(KEY);
+                if (saved === '1') {
+                    body.classList.add('sidebar-mini');
+                } else {
+                    // default: open sidebar
+                    body.classList.remove('sidebar-mini');
+                    if (saved === null) localStorage.setItem(KEY, '0');
+                }
+            }
+
+            function saveState() {
+                const minimized = body.classList.contains('sidebar-mini');
+                localStorage.setItem(KEY, minimized ? '1' : '0');
+            }
+
+            document.addEventListener('DOMContentLoaded', applySavedState);
+
+            // Listen to sidebar toggle clicks from Stisla
+            document.addEventListener('click', function(e) {
+                const toggle = e.target.closest('[data-toggle="sidebar"], .hide-sidebar-mini');
+                if (toggle) {
+                    setTimeout(saveState, 100); // wait Stisla to toggle classes
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>

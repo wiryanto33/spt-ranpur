@@ -69,10 +69,12 @@ class AssignPermissionController extends Controller implements HasMiddleware
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreUserToRoleRequest $request)
+    public function store(StoreAssignRequest $request)
     {
-        $role = Role::find($request->role);
-        $role->givePermissionTo($request->permissions);
+        $role = Role::findOrFail($request->role);
+        // Convert permission IDs from form into permission names expected by spatie/permission
+        $permissionNames = Permission::whereIn('id', (array) $request->permissions)->pluck('name')->toArray();
+        $role->givePermissionTo($permissionNames);
         return redirect()->route('assign.index')->with('success', 'Permission Assigned Successfully');
     }
 
@@ -110,7 +112,9 @@ class AssignPermissionController extends Controller implements HasMiddleware
      */
     public function update(UpdateAssignRequest $request, Role $role)
     {
-        $role->syncPermissions($request->permissions);
+        // Convert permission IDs from form into permission names expected by spatie/permission
+        $permissionNames = Permission::whereIn('id', (array) $request->permissions)->pluck('name')->toArray();
+        $role->syncPermissions($permissionNames);
         return redirect()->route('assign.index')->with('success', 'Permission Assigned Successfully');
     }
 

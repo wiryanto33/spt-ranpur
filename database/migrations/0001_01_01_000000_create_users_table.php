@@ -14,6 +14,12 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('pangkat')->nullable();
+            $table->string('nrp')->unique()->nullable();
+            $table->string('jabatan')->nullable();
+            $table->enum('status', ['AKTIF', 'TIDAK_AKTIF'])->default('AKTIF');
+            $table->string('image')->nullable();
+            $table->foreignId('ranpur_id')->nullable(); // Constraint will be added in a separate migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

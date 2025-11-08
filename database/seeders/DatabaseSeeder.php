@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\LaporanKerusakan;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,6 +22,12 @@ class DatabaseSeeder extends Seeder
             MenuGroupSeeder::class,
             MenuItemSeeder::class,
             CategorySeeder::class,
+            RanpurSeeder::class,
+            LaporanRutinSeeder::class,
+            LaporanKerusakanSeeder::class,
+            DiagnosisReportSeeder::class,
+            StorageLocationSeeder::class,
+            SparepartSeeder::class,
         ]);
     }
 }

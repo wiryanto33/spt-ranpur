@@ -77,7 +77,7 @@
                 </div>
                 <div class="col-12 col-md-12 col-lg-7">
                     <div class="card">
-                        <form method="POST" action="{{ route('user-profile-information.update') }}"
+                        <form method="POST" action="{{ route('user-profile-information.update') }}" enctype="multipart/form-data"
                             class="needs-validation" novalidate="">
                             @csrf
                             @method('PUT')
@@ -97,8 +97,65 @@
                                             </div>
                                         @enderror
                                     </div>
+                                    <div class="form-group col-md-6 col-12">
+                                        <label>Email (opsional)</label>
+                                        <input type="email" name="email"
+                                            class="form-control @error('email', 'updateProfileInformation') is-invalid @enderror"
+                                            value="{{ Auth::user()->email }}">
+                                        @error('email', 'updateProfileInformation')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
                                 </div>
-
+                                <div class="row">
+                                    <div class="form-group col-md-6 col-12">
+                                        <label>NRP</label>
+                                        <input type="text" name="nrp"
+                                            class="form-control @error('nrp', 'updateProfileInformation') is-invalid @enderror"
+                                            value="{{ Auth::user()->nrp }}">
+                                        @error('nrp', 'updateProfileInformation')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+                                    <div class="form-group col-md-6 col-12">
+                                        <label>Pangkat</label>
+                                        <input type="text" name="pangkat"
+                                            class="form-control @error('pangkat', 'updateProfileInformation') is-invalid @enderror"
+                                            value="{{ Auth::user()->pangkat }}">
+                                        @error('pangkat', 'updateProfileInformation')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6 col-12">
+                                        <label>Jabatan</label>
+                                        <input type="text" name="jabatan"
+                                            class="form-control @error('jabatan', 'updateProfileInformation') is-invalid @enderror"
+                                            value="{{ Auth::user()->jabatan }}">
+                                        @error('jabatan', 'updateProfileInformation')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+                                    <div class="form-group col-md-6 col-12">
+                                        <label>Foto Profil</label>
+                                        <input type="file" name="image" class="form-control-file @error('image', 'updateProfileInformation') is-invalid @enderror" accept="image/*">
+                                        @if(Auth::user()->image)
+                                            <div class="mt-2"><img src="{{ asset('storage/'.Auth::user()->image) }}" style="max-height:80px" class="rounded"></div>
+                                        @endif
+                                        @error('image', 'updateProfileInformation')
+                                            <div class="text-danger small">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
                             </div>
                             <div class="card-footer text-right">
                                 <button type="submit" class="btn btn-primary">Save Changes</button>

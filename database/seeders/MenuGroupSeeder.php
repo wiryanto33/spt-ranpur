@@ -37,7 +37,17 @@ class MenuGroupSeeder extends Seeder
                     'name' => 'Menu Management',
                     'icon' => 'fas fa-bars',
                     'permisison_name' => 'menu.management',
-                ]
+                ],
+                [
+                    'name' => 'Ranpur Management',
+                    'icon' => 'fas fa-truck',
+                    'permission_name' => 'ranpur.management',
+                ],
+                [
+                    'name' => 'Storage Management',
+                    'icon' => 'fas fa-database',
+                    'permission_name' => 'storage.management',
+                ],
             ]
         );
     }

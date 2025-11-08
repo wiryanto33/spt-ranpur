@@ -18,13 +18,19 @@ class UserSeeder extends Seeder
         User::create([
             'name' => "SuperAdmin",
             'email' => "superadmin@gmail.com",
-            'password' => Hash::make('randomPasswordabc'),
+            'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
         User::create([
-            'name' => "user",
-            'email' => "user@gmail.com",
-            'password' => Hash::make('randomPasswordabc123'),
+            'name' => "crew",
+            'email' => "crew@gmail.com",
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+        User::create([
+            'name' => "indra",
+            'email' => "indra@gmail.com",
+            'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
         // User::factory()->count(10)->create();

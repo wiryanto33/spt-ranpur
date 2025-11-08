@@ -53,7 +53,9 @@ class AssignUserToRoleController extends Controller implements HasMiddleware
     {
         //
         $user = User::findOrFail($request->user);
-        $user->assignRole($request->roles);
+        // convert role IDs to role names expected by spatie/permission
+        $roleNames = Role::whereIn('id', (array) $request->roles)->pluck('name')->toArray();
+        $user->assignRole($roleNames);
         return redirect()->route('assign.user.index')->with('success', 'User Assigned To Role Successfully');
     }
 
@@ -68,7 +70,9 @@ class AssignUserToRoleController extends Controller implements HasMiddleware
     public function update(UpdateUserToRoleRequest $request, User $user)
     {
         //
-        $user->syncRoles($request->roles);
+        // convert role IDs to role names expected by spatie/permission
+        $roleNames = Role::whereIn('id', (array) $request->roles)->pluck('name')->toArray();
+        $user->syncRoles($roleNames);
         return redirect()->route('assign.user.index')->with('success', 'User Assigned To Role Successfully');
     }
 }

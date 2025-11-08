@@ -18,6 +18,18 @@
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/components.css">
     {{-- <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script> --}}
+    <style>
+        html, body { height: 100%; }
+        body {
+            background-image: url('{{ asset('assets/img/tank.-bg.jpg') }}');
+            background-size: cover;              /* penuhi layar tanpa distorsi */
+            background-repeat: no-repeat;        /* jangan diulang */
+            background-position: center center;  /* posisi gambar di tengah */
+            background-attachment: fixed;        /* efek parallax ringan, opsional */
+        }
+        /* Sedikit ruang transparan agar konten tetap terbaca di atas background */
+        .section { position: relative; }
+    </style>
 </head>
 
 <body>
@@ -28,12 +40,12 @@
                     <div
                         class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
                         <div class="login-brand">
-                            <img src="../assets/img/stisla-fill.svg" alt="logo" width="100"
+                            <img src="../assets/img/tank.png" alt="logo" width="200"
                                 class="shadow-light rounded-circle">
                         </div>
                         <div class="card card-primary">
                             <div class="card-header">
-                                <h4>Login ke DosenNgoding</h4>
+                                <h4 class="mx-auto">SPT Ranpur Marinir</h4>
                             </div>
                             <div class="card-body">
                                 @if (session('status'))
@@ -85,11 +97,11 @@
                                 </form>
                             </div>
                         </div>
-                        <div class="mt-5 text-muted text-center">
+                        {{-- <div class="mt-5 text-muted text-center">
                             Don't have an account? <a href="/register">Create One</a>
-                        </div>
+                        </div> --}}
                         <div class="simple-footer">
-                            Copyright &copy; Stisla 2018
+                            Copyright &copy; Rizal
                         </div>
                     </div>
                 </div>

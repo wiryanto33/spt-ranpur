@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DemoController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Menu\MenuGroupController;
 use App\Http\Controllers\Menu\MenuItemController;
 use App\Http\Controllers\RoleAndPermission\AssignPermissionController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\RoleAndPermission\RoleController;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\NotificationController;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -32,10 +34,19 @@ Route::get('/', function () {
     return view('auth/login');
 });
 
+// Additional group for Storage Location under the same prefix
 Route::group(['middleware' => ['auth', 'verified']], function () {
-    Route::get('/dashboard', function () {
-        return view('home', ['users' => User::get(),]);
+    Route::prefix('ranpur-management')->group(function () {
+        Route::resource('storage-location', \App\Http\Controllers\StorageLocationController::class);
+        Route::resource('sparepart', \App\Http\Controllers\SparepartController::class);
+        Route::resource('sparepart-request', \App\Http\Controllers\SparepartRequestController::class);
+        Route::resource('stock-movement', \App\Http\Controllers\StockMovementController::class);
+        Route::resource('repair-record', \App\Http\Controllers\RepairRecordController::class);
     });
+});
+
+Route::group(['middleware' => ['auth', 'verified']], function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('change-profile', function (Request $request) {
         return view('dashboard.profile');
@@ -78,4 +89,15 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
         Route::get('assing-user/{user}/edit', [AssignUserToRoleController::class, 'edit'])->name('assign.user.edit');
         Route::put('assign-user/{user}', [AssignUserToRoleController::class, 'update'])->name('assign.user.update');
     });
+
+    // Vehicle management
+    Route::prefix('ranpur-management')->group(function () {
+        Route::resource('ranpur', \App\Http\Controllers\RanpurController::class);
+        Route::resource('laporan-rutin', \App\Http\Controllers\LaporanRutinController::class);
+        Route::resource('laporan-kerusakan', \App\Http\Controllers\LaporanKerusakanController::class);
+        Route::resource('diagnosis-report', \App\Http\Controllers\DiagnosisReportController::class);
+    });
 });
+    // Notifications
+    Route::get('notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::get('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');

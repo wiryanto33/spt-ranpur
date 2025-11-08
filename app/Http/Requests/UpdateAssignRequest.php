@@ -25,8 +25,9 @@ class UpdateAssignRequest extends FormRequest
     {
         return [
             //
-            'role' => 'required|present|string',
-            'permissions' => 'array|required'
+            'role' => 'required|exists:roles,id',
+            'permissions' => 'array|required',
+            'permissions.*' => 'exists:permissions,id',
         ];
     }
 }
