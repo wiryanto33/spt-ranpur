@@ -3,7 +3,7 @@
         <select name="items[IDX][sparepart_id]" class="form-control" required>
             <option value="">Pilih sparepart</option>
             @foreach ($spareparts as $sp)
-                <option value="{{ $sp->id }}">{{ $sp->kode }} — {{ $sp->nama }}</option>
+                <option value="{{ $sp->id }}">{{ $sp->nama }}</option>
             @endforeach
         </select>
     </td>

@@ -45,7 +45,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="status">Status</label>
-                                    @php 
+                                    @php
                                         $status = old('status', $requestHeader->status);
                                         $canSetStatus = auth()->user()->hasRole('super-admin') || auth()->user()->hasRole('staff');
                                     @endphp
@@ -120,7 +120,7 @@
                                                     <select name="items[{{ $idx }}][sparepart_id]" class="form-control" required>
                                                         <option value="">Pilih sparepart</option>
                                                         @foreach ($spareparts as $sp)
-                                                            <option value="{{ $sp->id }}" {{ $it->sparepart_id == $sp->id ? 'selected' : '' }}>{{ $sp->kode }} — {{ $sp->nama }}</option>
+                                                            <option value="{{ $sp->id }}" {{ $it->sparepart_id == $sp->id ? 'selected' : '' }}>{{ $sp->nama }}</option>
                                                         @endforeach
                                                     </select>
                                                 </td>

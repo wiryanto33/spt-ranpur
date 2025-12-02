@@ -68,7 +68,7 @@
 
                     <div class="form-group">
                         <label>Deskripsi</label>
-                        <textarea class="form-control" rows="5" disabled>{{ $report->deskripsi }}</textarea>
+                        <textarea class="form-control" rows="10" disabled>{{ $report->deskripsi }}</textarea>
                     </div>
                 </div>
             </div>
