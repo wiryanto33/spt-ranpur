@@ -83,8 +83,9 @@
     <div class="col-md-12">
         <div class="form-group">
             <label for="deskripsi">Deskripsi</label>
-            <textarea name="deskripsi" id="deskripsi" rows="20" class="form-control @error('deskripsi') is-invalid @enderror"
-                placeholder="Detail kerusakan (opsional)">{{ old('deskripsi', $editing ? $report->deskripsi : '') }}</textarea>
+            <textarea name="deskripsi" id="deskripsi" rows="20"
+                style="min-height:200px !important; height:auto !important; box-sizing:border-box;"
+                class="form-control @error('deskripsi') is-invalid @enderror" placeholder="Detail kerusakan (opsional)">{{ old('deskripsi', $editing ? $report->deskripsi : '') }}</textarea>
             @error('deskripsi')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
