@@ -9,7 +9,14 @@ class SparepartRequest extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['diagnosis_report_id', 'requested_by', 'approved_by', 'tanggal', 'status', 'catatan'];
+    protected $fillable = [
+        'diagnosis_report_id',
+        'requested_by',
+        'approved_by',
+        'tanggal',
+        'status',
+        'catatan'
+    ];
     protected $casts = ['tanggal' => 'date'];
 
     public function diagnosis()

@@ -92,11 +92,17 @@ class SparepartRequestController extends Controller implements HasMiddleware
         });
 
         // Notify super-admin and staff when a mechanic creates a request
-        if ($user && $user->hasRole('mechanic')) {
+        if (auth()->user()->hasRole('mechanic')) {
             $recipients = User::role(['super-admin', 'staff'])->get();
             if ($recipients->isNotEmpty()) {
-                $header->load(['diagnosis.damageReport.vehicle', 'requester']);
-                Notification::send($recipients, new SparepartRequestCreated($header));
+                try{
+                    $header->load(['diagnosis.damageReport.vehicle', 'requester']);
+                    Notification::send($recipients, new SparepartRequestCreated($header));
+                } catch (\Throwable $e) {
+                    // Prevent notification failures (e.g., mail transport) from breaking request
+                    report($e);
+                }
+
             }
         }
 
@@ -158,7 +164,13 @@ class SparepartRequestController extends Controller implements HasMiddleware
         if ($canSetStatus && isset($newStatus) && $newStatus !== $oldStatus) {
             $sparepart_request->loadMissing('requester');
             if ($sparepart_request->requester && $sparepart_request->requester->hasRole('mechanic')) {
-                $sparepart_request->requester->notify(new SparepartRequestStatusUpdated($sparepart_request, $oldStatus, $newStatus));
+                try {
+
+                    $sparepart_request->requester->notify(new SparepartRequestStatusUpdated($sparepart_request, $oldStatus, $newStatus));
+                } catch (\Throwable $e) {
+                    // Prevent notification failures (e.g., mail transport) from breaking request
+                    report($e);
+                }
             }
         }
 
